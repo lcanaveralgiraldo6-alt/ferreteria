@@ -1,0 +1,26 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* === Ajuste del icono de ojo === */
+.password-container {
+    position: relative;
+}
+
+.password-container input {
+    padding-right: 2.5rem; /* espacio para el ojo */
+}
+
+.toggle-password {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    color: #6b7280; /* gris bonito */
+    transition: color 0.2s ease;
+}
+
+.toggle-password:hover {
+    color: #000;
+}
