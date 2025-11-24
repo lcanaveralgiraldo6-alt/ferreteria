@@ -7,14 +7,21 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\RedirectResponse;
 
-
 class ProveedorController extends Controller
 {
     // 📋 Listar todos los proveedores (todos pueden ver)
-    public function index()
+    public function index(Request $request)
     {
-        $proveedores = Proveedor::orderByDesc('id')->paginate(10);
-        return view('proveedores.index', compact('proveedores'));
+        $buscar = $request->input('buscar');
+
+        $proveedores = Proveedor::when($buscar, function ($query, $buscar) {
+                $query->where('nombre', 'like', "%{$buscar}%")
+                      ->orWhere('telefono', 'like', "%{$buscar}%");
+            })
+            ->orderByDesc('id')
+            ->paginate(10);
+
+        return view('proveedores.index', compact('proveedores', 'buscar'));
     }
 
     // 👀 Ver detalles de un proveedor (todos pueden ver)

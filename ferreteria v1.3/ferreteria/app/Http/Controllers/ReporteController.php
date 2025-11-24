@@ -16,18 +16,30 @@ class ReporteController extends Controller
         $hoy = Carbon::today();
         $minFecha = $hoy->copy()->subYear();
 
+        // 📅 Filtro por fecha de inicio
         if ($request->filled('fecha_inicio')) {
             $fechaInicio = Carbon::parse($request->fecha_inicio);
             if ($fechaInicio->lt($minFecha)) $fechaInicio = $minFecha;
             $query->whereDate('created_at', '>=', $fechaInicio);
         }
 
+        // 📅 Filtro por fecha de fin
         if ($request->filled('fecha_fin')) {
             $fechaFin = Carbon::parse($request->fecha_fin);
             if ($fechaFin->gt($hoy)) $fechaFin = $hoy;
             $query->whereDate('created_at', '<=', $fechaFin);
         }
 
+        // 🔍 Filtro adicional: nombre del cliente o total
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('nombre_cliente', 'like', "%{$search}%")
+                  ->orWhere('total', 'like', "%{$search}%");
+            });
+        }
+
+        // 📊 Obtener resultados
         $ventas = $query->orderBy('created_at', 'desc')->get();
 
         $totalVentas = $ventas->sum('total');
@@ -45,6 +57,15 @@ class ReporteController extends Controller
         }
         if ($request->filled('fecha_fin')) {
             $query->whereDate('created_at', '<=', $request->fecha_fin);
+        }
+
+        // 🔍 Aplicar búsqueda también en PDF (opcional)
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('nombre_cliente', 'like', "%{$search}%")
+                  ->orWhere('total', 'like', "%{$search}%");
+            });
         }
 
         $ventas = $query->orderBy('created_at', 'desc')->get();

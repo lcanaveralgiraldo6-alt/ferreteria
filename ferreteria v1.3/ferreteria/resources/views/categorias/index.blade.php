@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('layouts.app') 
 
 @section('content')
 <div class="container mt-4">
@@ -8,10 +8,19 @@
     <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap">
         <a href="{{ route('categorias.create') }}" class="btn btn-success mb-2">➕ Nueva Categoría</a>
 
-        <form method="GET" action="{{ route('categorias.index') }}" class="d-flex" style="max-width: 350px;">
-            <input type="text" name="search" class="form-control me-2" placeholder="Buscar categoría..."
-                   value="{{ request('search') }}">
-            <button type="submit" class="btn btn-primary">🔍 Buscar</button>
+        <form method="GET" action="{{ route('categorias.index') }}" class="d-flex" style="max-width: 380px;">
+            <input 
+                type="text" 
+                name="search" 
+                class="form-control me-2" 
+                placeholder="Buscar categoría..." 
+                value="{{ request('search') }}"
+            >
+            <button type="submit" class="btn btn-primary me-2">Buscar</button>
+
+            @if(request('search'))
+                <a href="{{ route('categorias.index') }}" class="btn btn-secondary"> Limpiar</a>
+            @endif
         </form>
     </div>
 

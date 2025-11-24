@@ -8,21 +8,38 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Http\RedirectResponse;
 
-
 class UsuarioController extends Controller
 {
-    public function index()
+    // 📋 Listar usuarios (con búsqueda)
+    public function index(Request $request)
     {
-        $usuarios = User::with('role')->orderBy('id', 'asc')->get();
+        $query = User::with('role')->orderBy('id', 'asc');
+
+        // 🔍 Filtro por nombre, correo o rol
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%")
+                  ->orWhereHas('role', function ($q2) use ($search) {
+                      $q2->where('nombre', 'like', "%{$search}%");
+                  });
+            });
+        }
+
+        $usuarios = $query->get();
+
         return view('usuarios.index', compact('usuarios'));
     }
 
+    // 🧰 Crear usuario
     public function create()
     {
         $roles = Role::all();
         return view('usuarios.create', compact('roles'));
     }
 
+    // 💾 Guardar usuario
     public function store(Request $request)
     {
         $request->validate([
@@ -31,10 +48,10 @@ class UsuarioController extends Controller
             'password' => [
                 'required',
                 'min:8',
-                'regex:/[A-Z]/',      // Mayúscula
-                'regex:/[a-z]/',      // Minúscula
-                'regex:/[0-9]/',      // Número
-                'regex:/[@$!%*#?&]/', // Símbolo
+                'regex:/[A-Z]/',
+                'regex:/[a-z]/',
+                'regex:/[0-9]/',
+                'regex:/[@$!%*#?&]/',
             ],
             'role_id' => 'required|exists:roles,id',
         ], [
@@ -60,12 +77,14 @@ class UsuarioController extends Controller
         return redirect()->route('usuarios.index')->with('success', 'Usuario creado correctamente.');
     }
 
+    // ✏️ Editar usuario
     public function edit(User $usuario)
     {
         $roles = Role::all();
         return view('usuarios.edit', compact('usuario', 'roles'));
     }
 
+    // 🔁 Actualizar usuario
     public function update(Request $request, User $usuario)
     {
         $request->validate([
@@ -105,6 +124,7 @@ class UsuarioController extends Controller
         return redirect()->route('usuarios.index')->with('success', 'Usuario actualizado correctamente.');
     }
 
+    // 🗑️ Eliminar usuario
     public function destroy(User $usuario)
     {
         $usuario->delete();

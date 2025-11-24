@@ -12,9 +12,20 @@ use Illuminate\Http\RedirectResponse;
 class ProductoController extends Controller
 {
     // 📋 Mostrar lista de productos (todos pueden ver)
-    public function index()
+    public function index(Request $request)
     {
-        $productos = Producto::with(['categoria', 'proveedor'])->paginate(10);
+        $buscar = $request->input('buscar');
+
+        $productos = Producto::with(['categoria', 'proveedor'])
+            ->when($buscar, function ($query, $buscar) {
+                $query->where('nombre', 'like', "%{$buscar}%")
+                    ->orWhereHas('categoria', function ($q) use ($buscar) {
+                        $q->where('nombre', 'like', "%{$buscar}%");
+                    });
+            })
+            ->orderBy('id', 'desc')
+            ->paginate(10);
+
         return view('productos.index', compact('productos'));
     }
 

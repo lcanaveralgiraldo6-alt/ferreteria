@@ -9,8 +9,18 @@
 
     <!-- Buscador -->
     <form method="GET" action="{{ route('proveedores.index') }}" class="mb-4 d-flex" style="max-width: 400px;">
-        <input type="text" name="search" class="form-control me-2" placeholder="Buscar proveedor..." value="{{ request('search') }}">
-        <button type="submit" class="btn btn-primary">Buscar</button>
+        <input 
+            type="text" 
+            name="buscar" 
+            class="form-control me-2" 
+            placeholder="Buscar por nombre o teléfono..." 
+            value="{{ request('buscar') }}"
+        >
+        <button type="submit" class="btn btn-primary me-2">Buscar</button>
+
+        @if(request('buscar'))
+            <a href="{{ route('proveedores.index') }}" class="btn btn-secondary"> Limpiar</a>
+        @endif
     </form>
 
     <!-- Tabla de proveedores -->
@@ -50,6 +60,11 @@
                 @endforelse
             </tbody>
         </table>
+    </div>
+
+    <!-- Paginación -->
+    <div class="d-flex justify-content-center mt-3">
+        {{ $proveedores->appends(['buscar' => request('buscar')])->links() }}
     </div>
 </div>
 @endsection
